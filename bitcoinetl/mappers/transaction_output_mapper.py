@@ -22,6 +22,7 @@
 
 from bitcoinetl.btc_utils import bitcoin_to_satoshi
 from bitcoinetl.domain.transaction_output import BtcTransactionOutput
+from bitcoinetl.btc_utils import decode_address_from_pubkey
 
 
 class BtcTransactionOutputMapper(object):
@@ -58,13 +59,18 @@ class BtcTransactionOutputMapper(object):
     def outputs_to_dicts(self, outputs):
         result = []
         for output in outputs:
+            addresses = (
+                [decode_address_from_pubkey(output.script_asm.split(" ")[0])]
+                if output.type in ("nonstandard", "pubkey")
+                else output.addresses
+            )
             item = {
                 'index': output.index,
                 'script_asm': output.script_asm,
                 'script_hex': output.script_hex,
                 'required_signatures': output.required_signatures,
                 'type': output.type,
-                'addresses': output.addresses,
+                'addresses': addresses,
                 'value': output.value
             }
             result.append(item)
