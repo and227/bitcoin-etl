@@ -22,6 +22,7 @@
 
 
 from bitcoinetl.domain.transaction_input import BtcTransactionInput
+from bitcoinetl.btc_utils import decode_address_from_pubkey
 
 
 class BtcTransactionInputMapper(object):
@@ -52,6 +53,11 @@ class BtcTransactionInputMapper(object):
     def inputs_to_dicts(self, inputs):
         result = []
         for input in inputs:
+            addresses = (
+                [decode_address_from_pubkey(input.script_asm.split(" ")[0])]
+                if input.type in ("nonstandard", "pubkey")
+                else input.addresses
+            )
             item = {
                 'index': input.index,
                 'spent_transaction_hash': input.spent_transaction_hash,
@@ -61,7 +67,7 @@ class BtcTransactionInputMapper(object):
                 'sequence': input.sequence,
                 'required_signatures': input.required_signatures,
                 'type': input.type,
-                'addresses': input.addresses,
+                'addresses': addresses,
                 'value': input.value,
             }
             result.append(item)
