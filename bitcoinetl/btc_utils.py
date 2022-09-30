@@ -2,6 +2,10 @@ import math
 from decimal import Decimal
 import hashlib
 import base58
+import logging
+
+
+logger = logging.getLogger()
 
 
 def bitcoin_to_satoshi(bitcoin_value):
@@ -44,3 +48,13 @@ def decode_address_from_pubkey(pubkey: str, compress_pubkey: bool = False) -> st
     address = (base58.b58encode(bytes(bytearray.fromhex(key_hash + checksum)))).decode('utf-8')
 
     return address
+
+
+def get_addresses(addresses, type_, asm):
+    if type_ in ("nonstandard", "pubkey"):
+        asm_commands = asm.split(" ")
+        if len(asm_commands) == 2 and asm_commands[1] == "OP_CHECKSIG":
+            decoded_address = decode_address_from_pubkey(asm_commands[0])
+            return [decoded_address]
+
+    return addresses
